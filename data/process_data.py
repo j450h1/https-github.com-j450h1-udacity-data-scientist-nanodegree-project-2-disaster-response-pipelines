@@ -2,6 +2,9 @@
 import pandas as pd
 from sqlalchemy import create_engine
 
+# get current directory
+import os; print(os.getcwd())
+
 ########################
 # Loads the messages and categories datasets
 ########################
@@ -60,5 +63,8 @@ df.drop_duplicates(inplace=True)
 # Stores it in a SQLite database
 #########################
 
-engine = create_engine('sqlite:///InsertDatabaseName.db')
+engine = create_engine('sqlite:///testDatabase.db')
 df.to_sql('test_table', engine, index=False)
+
+
+
