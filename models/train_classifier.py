@@ -38,9 +38,9 @@ stop_words = stopwords.words("english")
 lemmatizer = WordNetLemmatizer()
 
 def tokenize(text):
-	"""
-	Tokenize text to be used in pipeline
-	"""
+    """
+    Tokenize text to be used in pipeline
+    """
     # normalize case and remove punctuation
     text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
     # tokenize text
@@ -64,6 +64,8 @@ parameters = {
     }
 
 cv = GridSearchCV(pipeline, parameters, verbose=1)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y)
 
 # Train Model
 
