@@ -19,6 +19,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 import pickle
+from functools import partial
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('words')
@@ -29,8 +30,23 @@ nltk.download('wordnet') # download for lemmatization
 # Usage while in this folder:
 # python train_classifier.py ../data/DisasterResponse.db classifier.pkl
 
+def tokenize(text):
+    """
+    Tokenize text to be used in pipeline
+    """
+    # normalize case and remove punctuation
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
+    
+    # tokenize text
+    tokens = word_tokenize(text)
+    
+    # lemmatize and remove stop words
+    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+
+    return(tokens)
+
 def main():
-    # Read in database file
+# Read in database file
     #engine = create_engine('sqlite:///../data/DisasterResponse.db')
     engine = create_engine(f'sqlite:///{sys.argv[1]}')
     df = pd.read_sql_table('disaster_table', con = engine)
@@ -43,32 +59,17 @@ def main():
     stop_words = stopwords.words("english")
     lemmatizer = WordNetLemmatizer()
 
-    def tokenize(text):
-        """
-        Tokenize text to be used in pipeline
-        """
-        # normalize case and remove punctuation
-        text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
-        
-        # tokenize text
-        tokens = word_tokenize(text)
-        
-        # lemmatize and remove stop words
-        tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
-
-        return(tokens)
-
     # Build pipeline
 
     pipeline = Pipeline([
-            ('vect', CountVectorizer(tokenizer=tokenize)),
+            ('vect', CountVectorizer(tokenizer=partial(tokenize))),
             ('tfidf', TfidfTransformer()),
             ('clf', MultiOutputClassifier(RandomForestClassifier()))
-        ])
+            ])
 
     parameters = {
                         'tfidf__use_idf': (True, False)
-                       ,'clf__estimator__bootstrap': (True, False)
+                    # ,'clf__estimator__bootstrap': (True, False) ##too slow
         }
 
     cv = GridSearchCV(pipeline, parameters, verbose=1)
@@ -77,7 +78,7 @@ def main():
 
     # Train Model
 
-    print("Please wait: model is training\n")
+    print("\nPlease wait: model is training (will take a few minutes)\n")
 
     cv.fit(X_train, y_train)
 
@@ -86,10 +87,12 @@ def main():
     # Save to file in the current working directory
     #pkl_filename = "classifier.pkl"
     pkl_filename = f"{sys.argv[2]}"
-    with open(pkl_filename, 'wb') as file:
-        pickle.dump(cv, file)
+
+    pickle.dump(model, open(pkl_filenam, 'wb'))
 
     print(f"Success! Model has been exported to {sys.argv[2]}")
 
 if __name__ == '__main__':
     main()
+
+    
