@@ -1,4 +1,6 @@
 import json
+
+
 import plotly
 import pandas as pd
 
@@ -41,12 +43,27 @@ model = joblib.load("../models/classifier.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+
+    # 1
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
-    
+
+    # 2
+    category = df.loc[:, ~df.columns.isin(['id','message', 'original', 'genre'])]
+
+    category_counts = category.sum()
+    category_names = list(category.columns)
+
+    # 3
+    df2 = df.copy()
+    df2['len'] = df2['message'].str.len()
+    df2.sort_values(by='len', ascending=False)
+    top10_longest = df2.head(10)
+    top10_counts = top10_longest['len']
+    top10_names = top10_longest['message']
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
+
     graphs = [
         {
             'data': [
@@ -63,6 +80,44 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        }
+        ,
+        {
+            'data': [
+                Bar(
+                    x=category_names,
+                    y=category_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        }
+        ,
+        {
+            'data': [
+                Bar(
+                    x=top10_names,
+                    y=top10_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Top 10: Longest Messages',
+                'yaxis': {
+                    'title': "Character Count"
+                },
+                'xaxis': {
+                    'title': "Message"
                 }
             }
         }
