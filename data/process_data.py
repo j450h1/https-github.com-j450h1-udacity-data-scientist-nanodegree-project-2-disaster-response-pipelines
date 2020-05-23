@@ -3,8 +3,8 @@ import sys
 import pandas as pd
 from sqlalchemy import create_engine
 
-# Usage
-#python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
+# Usage while in this folder:
+# python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
 
 def main():
 	# get current directory

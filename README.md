@@ -4,7 +4,7 @@ In this project, I've analyzed disaster data from Figure Eight and built a model
 This project consists of three parts:
 
 ## 1. ETL Pipeline
-In a Python script, process_data.py, write a data cleaning pipeline that:
+**process_data.py** writes a data cleaning pipeline that:
 
 * Loads the messages and categories datasets
 * Merges the two datasets
@@ -12,7 +12,7 @@ In a Python script, process_data.py, write a data cleaning pipeline that:
 * Stores it in a SQLite database
 
 ## 2. ML Pipeline
-In a Python script, train_classifier.py, write a machine learning pipeline that:
+**train_classifier.py** write a machine learning pipeline that:
 
 * Loads data from the SQLite database
 * Splits the dataset into training and test sets
@@ -35,14 +35,14 @@ In a Python script, train_classifier.py, write a machine learning pipeline that:
 |- run.py  # Flask file that runs app
 
 - data
-|- disaster_categories.csv  # data to process 
+|- disaster_categories.csv  # data to process
 |- disaster_messages.csv  # data to process
 |- process_data.py
-|- InsertDatabaseName.db   # database to save clean data to
+|- DisasterResponse.db   # database to save clean data to
 
 - models
 |- train_classifier.py
-|- classifier.pkl  # saved model 
+|- classifier.pkl  # saved model
 
-- README.md
+- README.md # This file
 

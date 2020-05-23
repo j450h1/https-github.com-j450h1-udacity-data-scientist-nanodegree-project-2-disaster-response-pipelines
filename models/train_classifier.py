@@ -1,4 +1,5 @@
 # import statements
+import sys
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
@@ -25,59 +26,70 @@ nltk.download('averaged_perceptron_tagger')
 nltk.download('maxent_ne_chunker')
 nltk.download('wordnet') # download for lemmatization
 
-# Read in database file
-engine = create_engine('sqlite:///../data/testDatabase.db')
-df = pd.read_sql_table('test_table', con = engine)
+# Usage while in this folder:
+# python train_classifier.py ../data/DisasterResponse.db classifier.pkl
 
-X = df['message']
-# All columns except the ones we don't need
-y = df.loc[:, ~df.columns.isin(['id','message', 'original', 'genre'])]
+def main():
+    # Read in database file
+    #engine = create_engine('sqlite:///../data/DisasterResponse.db')
+    engine = create_engine(f'sqlite:///{sys.argv[1]}')
+    df = pd.read_sql_table('disaster_table', con = engine)
 
-# Tokenize data
-stop_words = stopwords.words("english")
-lemmatizer = WordNetLemmatizer()
+    X = df['message']
+    # All columns except the ones we don't need
+    y = df.loc[:, ~df.columns.isin(['id','message', 'original', 'genre'])]
 
-def tokenize(text):
-    """
-    Tokenize text to be used in pipeline
-    """
-    # normalize case and remove punctuation
-    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
-    # tokenize text
-    tokens = word_tokenize(text)
-    # lemmatize andremove stop words
-    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+    # Tokenize data
+    stop_words = stopwords.words("english")
+    lemmatizer = WordNetLemmatizer()
 
-    return(tokens)
+    def tokenize(text):
+        """
+        Tokenize text to be used in pipeline
+        """
+        # normalize case and remove punctuation
+        text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
+        
+        # tokenize text
+        tokens = word_tokenize(text)
+        
+        # lemmatize and remove stop words
+        tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
 
-# Build pipeline
+        return(tokens)
 
-pipeline = Pipeline([
-        ('vect', CountVectorizer(tokenizer=tokenize)),
-        ('tfidf', TfidfTransformer()),
-        ('clf', MultiOutputClassifier(RandomForestClassifier()))
-    ])
+    # Build pipeline
 
-parameters = {
-                    'tfidf__use_idf': (True, False)
-                   ,'clf__estimator__bootstrap': (True, False)
-    }
+    pipeline = Pipeline([
+            ('vect', CountVectorizer(tokenizer=tokenize)),
+            ('tfidf', TfidfTransformer()),
+            ('clf', MultiOutputClassifier(RandomForestClassifier()))
+        ])
 
-cv = GridSearchCV(pipeline, parameters, verbose=1)
+    parameters = {
+                        'tfidf__use_idf': (True, False)
+                       ,'clf__estimator__bootstrap': (True, False)
+        }
 
-X_train, X_test, y_train, y_test = train_test_split(X, y)
+    cv = GridSearchCV(pipeline, parameters, verbose=1)
 
-# Train Model
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-print("Model is training - please wait: ")
+    # Train Model
 
-cv.fit(X_train, y_train)
+    print("Please wait: model is training\n")
 
-# Export pickle file
+    cv.fit(X_train, y_train)
 
-# Save to file in the current working directory
-pkl_filename = "pickle_model.pkl"
-with open(pkl_filename, 'wb') as file:
-    pickle.dump(cv, file)
+    # Export pickle file
 
-print("Success! Model has been exported to pickle_model.pkl")
+    # Save to file in the current working directory
+    #pkl_filename = "classifier.pkl"
+    pkl_filename = f"{sys.argv[2]}"
+    with open(pkl_filename, 'wb') as file:
+        pickle.dump(cv, file)
+
+    print(f"Success! Model has been exported to {sys.argv[2]}")
+
+if __name__ == '__main__':
+    main()
