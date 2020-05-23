@@ -1,70 +1,84 @@
 # import libraries
+import sys
 import pandas as pd
 from sqlalchemy import create_engine
 
-# get current directory
-import os; print(os.getcwd())
+# Usage
+#python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
 
-########################
-# Loads the messages and categories datasets
-########################
+def main():
+	# get current directory
+	#import os; print(os.getcwd())
+	#print(sys.argv[:])
 
-# load messages dataset
-messages = pd.read_csv('messages.csv')
+	########################
+	# Loads the messages and categories datasets
+	########################
 
-# load categories dataset
-categories = pd.read_csv('categories.csv')
+	# load messages dataset
+	#messages = pd.read_csv('messages.csv')
+	messages = pd.read_csv(f'{sys.argv[1]}')
 
-#########################
-# Merges the two datasets
-#########################
+	# load categories dataset
+	#categories = pd.read_csv('categories.csv')
+	categories = pd.read_csv(f'{sys.argv[2]}')
 
-# merge datasets
-df = messages.merge(categories) #implicitly on id
+	#########################
+	# Merges the two datasets
+	#########################
 
-#########################
-# Cleans the data
-#########################
-# Split `categories` into separate category columns.
+	# merge datasets
+	df = messages.merge(categories) #implicitly on id
 
-# create a dataframe of the 36 individual category columns
-categories = df['categories'].str.split(pat=';', n=36, expand=True)
+	#########################
+	# Cleans the data
+	#########################
+	# Split `categories` into separate category columns.
 
-# select the first row of the categories dataframe
-row = categories.iloc[0, : ]
+	# create a dataframe of the 36 individual category columns
+	categories = df['categories'].str.split(pat=';', n=36, expand=True)
 
-# use this row to extract a list of new column names for categories.
-# one way is to apply a lambda function that takes everything 
-# up to the second to last character of each string with slicing
-category_colnames = [name[:-2] for name in row]
+	# select the first row of the categories dataframe
+	row = categories.iloc[0, : ]
 
-# rename the columns of `categories`
-categories.columns = category_colnames
+	# use this row to extract a list of new column names for categories.
+	# one way is to apply a lambda function that takes everything
+	# up to the second to last character of each string with slicing
+	category_colnames = [name[:-2] for name in row]
 
-#Convert category values to just numbers 0 or 1.
-for column in categories:
-    # set each value to be the last character of the string
-    categories[column] = categories[column].astype(str).str[-1:]
-    # convert column from string to numeric
-    categories[column] = categories[column].astype(int)
+	# rename the columns of `categories`
+	categories.columns = category_colnames
 
-# Replace categories column in df with new category columns.
+	#Convert category values to just numbers 0 or 1.
+	for column in categories:
+	    # set each value to be the last character of the string
+	    categories[column] = categories[column].astype(str).str[-1:]
+	    # convert column from string to numeric
+	    categories[column] = categories[column].astype(int)
 
-# drop the original categories column from `df`
-df.drop(columns = 'categories', inplace = True)
+	# Replace categories column in df with new category columns.
 
-# concatenate the original dataframe with the new `categories` dataframe
-df = pd.merge(df, categories, left_index=True, right_index=True)
+	# drop the original categories column from `df`
+	df.drop(columns = 'categories', inplace = True)
 
-# drop duplicates
-df.drop_duplicates(inplace=True)
+	# concatenate the original dataframe with the new `categories` dataframe
+	df = pd.merge(df, categories, left_index=True, right_index=True)
 
-#########################
-# Stores it in a SQLite database
-#########################
+	# drop duplicates
+	df.drop_duplicates(inplace=True)
 
-engine = create_engine('sqlite:///testDatabase.db')
-df.to_sql('test_table', engine, index=False)
+	#########################
+	# Stores it in a SQLite database
+	#########################
 
+	#engine = create_engine('sqlite:///DisasterResponse.db')
+	engine = create_engine(f'sqlite:///{sys.argv[3]}')
+	df.to_sql('disaster_table', engine, index=False, 
+	if_exists='replace') # Overwrite if table already exists
+
+	print(f"{sys.argv[3]} database created!")
+
+if __name__ == '__main__':
+    main()
 
 
