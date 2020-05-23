@@ -12,7 +12,7 @@ This project consists of three parts:
 * Stores it in a SQLite database
 
 ## 2. ML Pipeline
-**train_classifier.py** write a machine learning pipeline that:
+**train_classifier.py** writes a machine learning pipeline that:
 
 * Loads data from the SQLite database
 * Splits the dataset into training and test sets
@@ -23,8 +23,8 @@ This project consists of three parts:
 
 ## 3. Flask Web App
 
-* Modify file paths for database and model as needed
-* Add data visualizations using Plotly in the web app
+* Displays visualizations about the training data using Plotly
+* Runs the model on new messages that you enter yourself
 
 ## Project File Tree
 ```
