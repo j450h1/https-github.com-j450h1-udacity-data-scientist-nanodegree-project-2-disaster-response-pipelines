@@ -1,6 +1,8 @@
 # udacity-data-scientist-nanodegree-project-2-disaster-response-pipelines
 In this project, I've analyzed disaster data from Figure Eight and built a model for an API that classifies disaster messages.
 
+![](img/screenshot.png)
+
 This project consists of three parts:
 
 ## 1. ETL Pipeline
@@ -43,6 +45,9 @@ This project consists of three parts:
 - models
 |- train_classifier.py
 |- classifier.pkl  # saved model
+
+- img
+|- screenshot.png # screenshot of the web app
 
 - README.md # this file
 ```

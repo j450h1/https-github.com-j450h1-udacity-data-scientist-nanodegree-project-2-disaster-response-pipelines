@@ -49,7 +49,11 @@ def tokenize(text):
     return(tokens)
 
 def main():
-# Read in database file
+    """
+    Read in database file, train a classification model, output to pickle file
+    """
+    
+    # Read in database file
     #engine = create_engine('sqlite:///../data/DisasterResponse.db')
     engine = create_engine(f'sqlite:///{sys.argv[1]}')
     df = pd.read_sql_table('disaster_table', con = engine)
@@ -57,8 +61,6 @@ def main():
     X = df['message']
     # All columns except the ones we don't need
     y = df.loc[:, ~df.columns.isin(['id','message', 'original', 'genre'])]
-
-
 
     # Build pipeline
 

@@ -3,10 +3,12 @@ import json
 
 import plotly
 import pandas as pd
-
+import re
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-
+from nltk.corpus import stopwords
+import nltk
+nltk.download('stopwords')
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
@@ -16,16 +18,25 @@ from sqlalchemy import create_engine
 
 app = Flask(__name__)
 
+# below function needs to be here again due to this error:
+#  AttributeError: module '__main__' has no attribute 'tokenize'
 def tokenize(text):
-    tokens = word_tokenize(text)
+    """
+    Tokenize text to be used in pipeline
+    """
+    stop_words = stopwords.words("english")
     lemmatizer = WordNetLemmatizer()
+    
+    # normalize case and remove punctuation
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
+    
+    # tokenize text
+    tokens = word_tokenize(text)
+    
+    # lemmatize and remove stop words
+    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
 
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
+    return(tokens)
 
 # load data
 
@@ -136,10 +147,11 @@ def index():
 def go():
     # save user input in query
     query = request.args.get('query', '') 
-
+    #query = "test"
     # use model to predict classification for query
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
+    #classification_results = {"test": 1}
 
     # This will render the go.html Please see that file. 
     return render_template(

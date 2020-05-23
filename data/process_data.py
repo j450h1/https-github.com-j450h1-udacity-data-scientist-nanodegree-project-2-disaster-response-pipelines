@@ -7,6 +7,9 @@ from sqlalchemy import create_engine
 # python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
 
 def main():
+	"""
+	Load data, merge it, clean it, and then export it to database
+	"""
 	# get current directory
 	#import os; print(os.getcwd())
 	#print(sys.argv[:])
