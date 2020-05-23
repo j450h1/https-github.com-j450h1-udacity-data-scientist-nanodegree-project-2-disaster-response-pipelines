@@ -34,6 +34,9 @@ def tokenize(text):
     """
     Tokenize text to be used in pipeline
     """
+    stop_words = stopwords.words("english")
+    lemmatizer = WordNetLemmatizer()
+    
     # normalize case and remove punctuation
     text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
     
@@ -55,14 +58,12 @@ def main():
     # All columns except the ones we don't need
     y = df.loc[:, ~df.columns.isin(['id','message', 'original', 'genre'])]
 
-    # Tokenize data
-    stop_words = stopwords.words("english")
-    lemmatizer = WordNetLemmatizer()
+
 
     # Build pipeline
 
     pipeline = Pipeline([
-            ('vect', CountVectorizer(tokenizer=partial(tokenize))),
+            ('vect', CountVectorizer(tokenizer=tokenize)),
             ('tfidf', TfidfTransformer()),
             ('clf', MultiOutputClassifier(RandomForestClassifier()))
             ])
@@ -88,11 +89,9 @@ def main():
     #pkl_filename = "classifier.pkl"
     pkl_filename = f"{sys.argv[2]}"
 
-    pickle.dump(model, open(pkl_filenam, 'wb'))
+    pickle.dump(cv, open(pkl_filename, 'wb'))
 
     print(f"Success! Model has been exported to {sys.argv[2]}")
 
 if __name__ == '__main__':
     main()
-
-    
